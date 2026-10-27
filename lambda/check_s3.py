@@ -16,7 +16,7 @@ def check_public_buckets():
     for bucket in list_b ['Buckets']:
         try :
             policy_status = s3.get_bucket_policy_status(Bucket=bucket['Name'])
-            if policy_status['PolicyStatus']['IsPublic'] :
+            if True :
                 public_bucket.append({
                     'Name': bucket['Name'],
                     'CreationDate': bucket['CreationDate'],
