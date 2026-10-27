@@ -7,9 +7,8 @@ def check_public_buckets():
     
     try : 
         list_b = s3.list_buckets()
-    except ClientError as e :
-        print(f"AWS rejected the request: ")
-        return []
+    except ClientError :
+        raise 
 
 
     public_bucket = []
