@@ -1,17 +1,54 @@
 name: CI
 on:
   pull_request:
-    branches: [main]
+    branches: 
+      - main
+
+
+permissions: 
+  id-token: write
+  contents: read
+
+concurrency: 
+  group: terraform-scanner
+  cancel-in-progress: false 
+
 
 jobs: 
-  test: 
+  test :
+    name: "Test and Plan"
     runs-on: ubuntu-latest
 
     steps: 
-    - uses: actions/checkout@v7
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::889992886230:role/github-actions-terraform-role
+          aws-region: us-east-1
 
+      - name: Setup Terraform 
+        uses: hashicorp/setup-terraform@v3
 
-    - run: pip install boto3
-    - run: pip install -U pytest
+      - name: Terraform init 
+        run: terraform init -input=false
+      
+      - name: Terraform Format & Validate
+        run: |
+          terraform fmt -check 
+          terraform validate
+      
+      - name: Terraform Plan 
+        run: terraform plan -input=false
+    
 
-    - run: pytest
+      - name: install boto3
+        run: pip install boto3
+      
+      - name: install pytest
+        run: pip install -U pytest
+
+      - name: run pytest 
+        run: pytest
