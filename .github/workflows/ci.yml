@@ -16,7 +16,7 @@ concurrency:
 
 jobs: 
   test :
-    name: "Test and Plan"
+    name: "Test and plan"
     runs-on: ubuntu-latest
 
     steps: 
