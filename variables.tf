@@ -8,5 +8,6 @@ variable "sns_email" {
   description = "sns email"
   type        = string
   sensitive   = true
+  default = "salwamarchanitech@gmail.com"
 
 }
