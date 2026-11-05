@@ -50,8 +50,6 @@ jobs:
       - name: Terraform init 
         run: terraform init -input=false
 
-      - name: Check Terraform formatting
-        run: terraform fmt -check -recursive
       
       - name: Terraform Format & Validate
         run: |
