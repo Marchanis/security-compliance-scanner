@@ -59,6 +59,8 @@ jobs:
       
       - name: Terraform Plan 
         run: terraform plan -input=false
+        env:
+          TF_VAR_sns_email: ${{ secrets.SNS_EMAIL }}
     
 
       - name: install boto3
