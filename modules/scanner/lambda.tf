@@ -1,7 +1,7 @@
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_dir  = "${path.module}/lambda"
-  output_path = "${path.module}/lambda.zip"
+  source_dir  = "${path.module}/../../lambda"
+  output_path = "${path.module}/../../lambda.zip"
 }
 
 
@@ -12,7 +12,7 @@ resource "aws_lambda_function" "lambda_function" {
   runtime          = "python3.11"
   filename         = data.archive_file.lambda_zip.output_path
   source_code_hash = data.archive_file.lambda_zip.output_base64sha256
-  timeout          = 30
+  timeout          = var.lambda_timeout
 
   environment {
     variables = {
@@ -20,3 +20,4 @@ resource "aws_lambda_function" "lambda_function" {
     }
   }
 }
+
