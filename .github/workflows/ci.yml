@@ -54,7 +54,7 @@ jobs:
       - name: Terraform Format & Validate
         run: |
 
-          terraform fmt -check 
+          terraform fmt -check -recursive
           terraform validate
       
       - name: Terraform Plan 

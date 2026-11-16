@@ -1,4 +1,3 @@
-
 resource "aws_s3_bucket" "artifact_s3_bucket_scanner" {
   bucket = "sal-security-compliance-artifacts"
 

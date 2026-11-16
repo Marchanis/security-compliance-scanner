@@ -1,5 +1,5 @@
 resource "aws_scheduler_schedule" "weekly_schedule" {
-  name        = "security-compliance-weekly-schedule"
+  name        = "security-compliance-weekly-schedule-${var.environment}"
   description = "Weekly schedule to trigger the lambda function"
   group_name  = "default"
 
@@ -22,7 +22,7 @@ resource "aws_scheduler_schedule" "weekly_schedule" {
 
 
 resource "aws_iam_role" "scheduler_role" {
-  name = "security_compliance_scheduler_role"
+  name = "security_compliance_scheduler_role_${var.environment}"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [

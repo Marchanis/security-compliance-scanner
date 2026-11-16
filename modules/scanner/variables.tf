@@ -13,3 +13,19 @@ variable "environment" {
   description = "Deployment environment (dev or production)"
   type        = string
 }
+
+variable "topic_name" {
+  description = "SNS topic name"
+  type        = string
+}
+
+variable "sns_email" {
+  description = "SNS subscription email"
+  type        = string
+}
+
+variable "permissions_boundary_arn" {
+  description = "arn of permission boundary"
+  type        = string
+  default     = null
+}

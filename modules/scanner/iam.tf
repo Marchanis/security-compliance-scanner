@@ -1,5 +1,6 @@
 resource "aws_iam_role" "lambda_execution_role" {
-  name = "security-compliance-scanner-${var.environment}-lambda-role"
+  name                 = "security-compliance-scanner-${var.environment}-lambda-role"
+  permissions_boundary = var.permissions_boundary_arn
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -29,12 +30,16 @@ resource "aws_iam_role_policy" "custom_policy" {
           "ec2:DescribeSecurityGroups",
           "rds:DescribeDBInstances",
           "iam:ListUsers",
-          "iam:ListMFADevices",
-          "sns:Publish",
+          "iam:ListMFADevices"
         ]
         Effect   = "Allow"
         Resource = "*"
       },
+      {
+        Effect   = "Allow"
+        Action   = "sns:Publish"
+        Resource = aws_sns_topic.sns_topic.arn
+      }
     ]
   })
 }
