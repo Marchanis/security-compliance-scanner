@@ -8,7 +8,7 @@ def check_ec2_sg():
         d_ins = ec2.describe_security_groups()                                                                      
     except ClientError as e :
         print(f"AWS rejected the request: {e}")
-        return []
+        return {'Security_Group': [], 'All_Traffic': [], 'error': str(e)}
             
     
     public_sg = []
@@ -27,7 +27,7 @@ def check_ec2_sg():
                     })
                     continue
                     
-                elif permission["IpProtocol"] != '-1' and  permission["FromPort"] == 22 and ip_range["CidrIp"] == "0.0.0.0/0" :
+                elif permission["IpProtocol"] != '-1' and  permission["FromPort"] <= 22 <= permission["ToPort"] and ip_range["CidrIp"] == "0.0.0.0/0" :
                     public_sg.append({
                             'GroupId': sg['GroupId'],
                             'FromPort': permission['FromPort'],

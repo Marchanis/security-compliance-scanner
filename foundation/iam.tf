@@ -40,11 +40,32 @@ resource "aws_iam_role_policy" "artifact_role" {
         ]
         Resource = "${aws_s3_bucket.artifact_s3_bucket_scanner.arn}/*"
 
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "root_state_s3_role" {
+  name = "root-state-read-access"
+  role = aws_iam_role.github_actions_ci.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject"
+        ]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner/terraform.tfstate"
 
       }
     ]
   })
 }
+
+
+
 
 
 
@@ -402,6 +423,7 @@ resource "aws_iam_policy" "production_lambda_boundary" {
 
 
 resource "aws_iam_role_policy" "dev_service_permissions" {
+  name = "security-compliance-scanner-dev-service-permissions"
   role = aws_iam_role.dev_deployment.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -464,6 +486,7 @@ resource "aws_iam_role_policy" "dev_service_permissions" {
 
 
 resource "aws_iam_role_policy" "production_service_permissions" {
+  name = "security-compliance-scanner-production-service-permissions"
   role = aws_iam_role.production_deployment.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -539,11 +562,8 @@ resource "aws_iam_role_policy" "dev_scheduler_iam_permissions" {
         Effect = "Allow"
         Action = [
           "iam:PutRolePolicy",
-          "iam:UpdateAssumeRolePolicy",
           "iam:DeleteRolePolicy",
-          "iam:CreateRole",
           "iam:GetRole",
-          "iam:DeleteRole",
           "iam:GetRolePolicy",
           "iam:ListRolePolicies"
         ]
@@ -579,11 +599,8 @@ resource "aws_iam_role_policy" "production_scheduler_iam_permissions" {
         Effect = "Allow"
         Action = [
           "iam:PutRolePolicy",
-          "iam:UpdateAssumeRolePolicy",
           "iam:DeleteRolePolicy",
-          "iam:CreateRole",
           "iam:GetRole",
-          "iam:DeleteRole",
           "iam:GetRolePolicy",
           "iam:ListRolePolicies"
         ]

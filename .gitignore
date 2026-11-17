@@ -7,3 +7,4 @@ output.json
 security-compliance-scanner-notes.md
 __pycache__
 .pytest_cache/
+.venv/

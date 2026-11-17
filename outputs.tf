@@ -39,7 +39,7 @@ output "production_scheduler_role_arn" {
 }
 
 output "dev_topic_subscription_arn" {
-  description = "arn of production topic subscription  "
+  description = "arn of dev topic subscription  "
   value       = module.dev_scanner.topic_subscription_arn
 }
 
