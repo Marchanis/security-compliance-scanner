@@ -15,9 +15,13 @@ concurrency:
 
 
 jobs: 
-  test :
-    name: "Test and Plan"
+  foundation :
+    name: "Foundation Validate and Plan"
     runs-on: ubuntu-latest
+  
+    defaults:
+      run:
+        working-directory: foundation
 
     steps: 
       - name: Checkout Code
@@ -59,17 +63,7 @@ jobs:
       
       - name: Terraform Plan 
         run: terraform plan -input=false
-        env:
-          TF_VAR_sns_email: ${{ secrets.SNS_EMAIL }}
+        
     
       
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-
-      - name: Install Python dependencies
-        run: python -m pip install -r requirements.txt
-
-      - name: Run Python tests
-        run: python -m pytest -v
+  

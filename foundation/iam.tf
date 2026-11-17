@@ -49,8 +49,59 @@ resource "aws_iam_role_policy" "artifact_role" {
   })
 }
 
-resource "aws_iam_role_policy" "root_state_s3_role" {
-  name = "root-state-read-access"
+
+resource "aws_iam_role_policy" "ci_environment_state_access" {
+  name = "ci-environment-state-access"
+  role = aws_iam_role.github_actions_ci.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = ["s3:GetObject"]
+        Resource = [
+          "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner-env/terraform.tfstate",
+          "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner/dev/terraform.tfstate",
+          "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner/production/terraform.tfstate"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = [
+          "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner/dev/terraform.tfstate.tflock",
+          "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner/production/terraform.tfstate.tflock"
+        ]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall"
+        Condition = {
+          StringLike = {
+            "s3:prefix" = [
+              "security-compliance-scanner-env/terraform.tfstate",
+              "security-compliance-scanner/dev/terraform.tfstate",
+              "security-compliance-scanner/dev/terraform.tfstate.tflock",
+              "security-compliance-scanner/production/terraform.tfstate",
+              "security-compliance-scanner/production/terraform.tfstate.tflock",
+              "security-compliance-scanner-env/terraform.tfstate.tflock",
+            ]
+          }
+        }
+      }
+    ]
+  })
+}
+
+
+resource "aws_iam_role_policy" "terraform_plan_read" {
+  name = "terraform-plan-read-access"
   role = aws_iam_role.github_actions_ci.id
 
   policy = jsonencode({
@@ -59,19 +110,82 @@ resource "aws_iam_role_policy" "root_state_s3_role" {
       {
         Effect = "Allow"
         Action = [
-          "s3:GetObject"
+          "iam:GetRole",
+          "iam:GetRolePolicy",
+          "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies"
         ]
-        Resource = "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner/terraform.tfstate"
+        Resource = [
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-dev-lambda-role",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-production-lambda-role",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security_compliance_scheduler_role_dev",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security_compliance_scheduler_role_production",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-action-oidc",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-dev-deployment",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-production-deployment"
 
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion"
+        ]
+        Resource = [
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          "arn:aws:iam::aws:policy/AdministratorAccess",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/security-compliance-scanner-dev-lambda-boundary",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/security-compliance-scanner-production-lambda-boundary"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "lambda:GetFunction",
+          "lambda:GetFunctionConfiguration",
+          "lambda:ListTags"
+        ]
+        Resource = [
+          "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:security-scanner-dev",
+          "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:security-scanner-production"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sns:GetTopicAttributes",
+          "sns:ListSubscriptionsByTopic"
+        ]
+        Resource = [
+          "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:dev_scanner_alert",
+          "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:production_scanner_alert"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = "sns:GetSubscriptionAttributes"
+        Resource = [
+          "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:dev_scanner_alert:*",
+          "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:production_scanner_alert:*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = "scheduler:GetSchedule"
+        Resource = [
+          "arn:aws:scheduler:${var.aws_region}:${data.aws_caller_identity.current.account_id}:schedule/default/security-compliance-weekly-schedule-dev",
+          "arn:aws:scheduler:${var.aws_region}:${data.aws_caller_identity.current.account_id}:schedule/default/security-compliance-weekly-schedule-production"
+        ]
+      },
+      {
+        Effect   = "Allow"
+        Action   = "scheduler:GetScheduleGroup"
+        Resource = "arn:aws:scheduler:${var.aws_region}:${data.aws_caller_identity.current.account_id}:schedule-group/default"
       }
     ]
   })
 }
-
-
-
-
-
 
 
 resource "aws_iam_role" "dev_deployment" {
@@ -130,18 +244,37 @@ resource "aws_iam_role_policy" "dev_iam_permissions" {
     Version = "2012-10-17"
     Statement = [
       {
+        Effect   = "Allow"
+        Action   = "iam:CreateRole"
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-dev-lambda-role"
+        Condition = {
+          ArnEquals = {
+            "iam:PermissionsBoundary" = aws_iam_policy.dev_lambda_boundary.arn
+          }
+        }
+      },
+      {
+        Effect   = "Allow"
+        Action   = "iam:CreateRole"
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security_compliance_scheduler_role_dev"
+      },
+      {
         Effect = "Allow"
         Action = [
-          "iam:CreateRole",
           "iam:GetRole",
+          "iam:GetRolePolicy",
           "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies",
           "iam:DeleteRole",
           "iam:DeleteRolePolicy",
           "iam:PutRolePolicy",
           "iam:UpdateAssumeRolePolicy",
-          "iam:DetachRolePolicy"
+          "iam:DetachRolePolicy",
         ]
-        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-dev-*"
+        Resource = [
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-dev-*",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security_compliance_scheduler_role_dev"
+        ]
 
       },
       {
@@ -229,18 +362,37 @@ resource "aws_iam_role_policy" "production_iam_permissions" {
     Version = "2012-10-17"
     Statement = [
       {
+        Effect   = "Allow"
+        Action   = "iam:CreateRole"
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-production-lambda-role"
+        Condition = {
+          ArnEquals = {
+            "iam:PermissionsBoundary" = aws_iam_policy.production_lambda_boundary.arn
+          }
+        }
+      },
+      {
+        Effect   = "Allow"
+        Action   = "iam:CreateRole"
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security_compliance_scheduler_role_production"
+      },
+      {
         Effect = "Allow"
         Action = [
-          "iam:CreateRole",
           "iam:GetRole",
+          "iam:GetRolePolicy",
           "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies",
           "iam:DeleteRole",
           "iam:DeleteRolePolicy",
           "iam:PutRolePolicy",
           "iam:UpdateAssumeRolePolicy",
-          "iam:DetachRolePolicy"
+          "iam:DetachRolePolicy",
         ]
-        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-production-*"
+        Resource = [
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-production-*",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security_compliance_scheduler_role_production"
+        ]
 
       },
       {
@@ -339,7 +491,7 @@ resource "aws_iam_policy" "dev_lambda_boundary" {
         Action = [
           "sns:Publish",
         ]
-        Resource = data.terraform_remote_state.owner.outputs.dev_scanner_arn
+        Resource = "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:dev_scanner_alert"
 
 
       },
@@ -416,7 +568,7 @@ resource "aws_iam_policy" "production_lambda_boundary" {
         Action = [
           "sns:Publish",
         ]
-        Resource = data.terraform_remote_state.owner.outputs.production_scanner_arn
+        Resource = "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:production_scanner_alert"
 
 
       },
@@ -442,7 +594,7 @@ resource "aws_iam_role_policy" "dev_service_permissions" {
           "lambda:GetFunctionConfiguration",
           "lambda:UpdateFunctionConfiguration"
         ]
-        Resource = data.terraform_remote_state.owner.outputs.dev_lambda_arn
+        Resource = "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:security-scanner-dev"
 
       },
       {
@@ -453,7 +605,7 @@ resource "aws_iam_role_policy" "dev_service_permissions" {
           "scheduler:GetSchedule",
           "scheduler:UpdateSchedule"
         ]
-        Resource = data.terraform_remote_state.owner.outputs.dev_schedule_arn
+        Resource = "arn:aws:scheduler:${var.aws_region}:${data.aws_caller_identity.current.account_id}:schedule/default/security-compliance-weekly-schedule-dev"
 
       },
       {
@@ -469,7 +621,7 @@ resource "aws_iam_role_policy" "dev_service_permissions" {
 
 
         ]
-        Resource = data.terraform_remote_state.owner.outputs.dev_scanner_arn
+        Resource = "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:dev_scanner_alert"
 
 
       },
@@ -479,7 +631,7 @@ resource "aws_iam_role_policy" "dev_service_permissions" {
           "sns:Unsubscribe",
           "sns:GetSubscriptionAttributes"
         ]
-        Resource = data.terraform_remote_state.owner.outputs.dev_topic_subscription_arn
+        Resource = "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:dev_scanner_alert:*"
       }
 
     ]
@@ -505,8 +657,7 @@ resource "aws_iam_role_policy" "production_service_permissions" {
           "lambda:GetFunctionConfiguration",
           "lambda:UpdateFunctionConfiguration"
         ]
-        Resource = data.terraform_remote_state.owner.outputs.production_lambda_arn
-
+        Resource = "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:security-scanner-production"
       },
       {
         Effect = "Allow"
@@ -516,7 +667,7 @@ resource "aws_iam_role_policy" "production_service_permissions" {
           "scheduler:GetSchedule",
           "scheduler:UpdateSchedule"
         ]
-        Resource = data.terraform_remote_state.owner.outputs.production_schedule_arn
+        Resource = "arn:aws:scheduler:${var.aws_region}:${data.aws_caller_identity.current.account_id}:schedule/default/security-compliance-weekly-schedule-production"
 
       },
       {
@@ -529,7 +680,7 @@ resource "aws_iam_role_policy" "production_service_permissions" {
           "sns:ListSubscriptionsByTopic",
           "sns:SetTopicAttributes",
         ]
-        Resource = data.terraform_remote_state.owner.outputs.production_scanner_arn
+        Resource = "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:production_scanner_alert"
       },
       {
         Effect = "Allow"
@@ -537,7 +688,7 @@ resource "aws_iam_role_policy" "production_service_permissions" {
           "sns:Unsubscribe",
           "sns:GetSubscriptionAttributes"
         ]
-        Resource = data.terraform_remote_state.owner.outputs.production_topic_subscription_arn
+        Resource = "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:production_scanner_alert:*"
       }
     ]
 
@@ -555,7 +706,7 @@ resource "aws_iam_role_policy" "dev_scheduler_iam_permissions" {
         Action = [
           "iam:PassRole"
         ]
-        Resource = data.terraform_remote_state.owner.outputs.dev_scheduler_role_arn
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security_compliance_scheduler_role_dev"
         Condition = {
           StringEquals = {
             "iam:PassedToService" = "scheduler.amazonaws.com"
@@ -571,7 +722,7 @@ resource "aws_iam_role_policy" "dev_scheduler_iam_permissions" {
           "iam:GetRolePolicy",
           "iam:ListRolePolicies"
         ]
-        Resource = data.terraform_remote_state.owner.outputs.dev_scheduler_role_arn
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security_compliance_scheduler_role_dev"
       }
     ]
   })
@@ -592,7 +743,7 @@ resource "aws_iam_role_policy" "production_scheduler_iam_permissions" {
         Action = [
           "iam:PassRole"
         ]
-        Resource = data.terraform_remote_state.owner.outputs.production_scheduler_role_arn
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security_compliance_scheduler_role_production"
         Condition = {
           StringEquals = {
             "iam:PassedToService" = "scheduler.amazonaws.com"
@@ -608,14 +759,116 @@ resource "aws_iam_role_policy" "production_scheduler_iam_permissions" {
           "iam:GetRolePolicy",
           "iam:ListRolePolicies"
         ]
-        Resource = data.terraform_remote_state.owner.outputs.production_scheduler_role_arn
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security_compliance_scheduler_role_production"
       }
     ]
   })
 }
 
 
+resource "aws_iam_role_policy" "dev_terraform_state" {
+  name = "dev-terraform-state-access"
+  role = aws_iam_role.dev_deployment.id
 
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetBucketLocation",
+          "s3:GetBucketVersioning"
+        ]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall"
+        Condition = {
+          StringLike = {
+            "s3:prefix" = [
+              "security-compliance-scanner/dev/terraform.tfstate",
+              "security-compliance-scanner/dev/terraform.tfstate.tflock",
+              "security-compliance-scanner-env/terraform.tfstate",
+            ]
+          }
+        }
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:GetObject", "s3:PutObject"]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner/dev/terraform.tfstate"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner/dev/terraform.tfstate.tflock"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:GetObject"]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner-env/terraform.tfstate"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "production_terraform_state" {
+  name = "production-terraform-state-access"
+  role = aws_iam_role.production_deployment.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetBucketLocation",
+          "s3:GetBucketVersioning"
+        ]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall"
+        Condition = {
+          StringLike = {
+            "s3:prefix" = [
+              "security-compliance-scanner/production/terraform.tfstate",
+              "security-compliance-scanner/production/terraform.tfstate.tflock",
+              "security-compliance-scanner-env/terraform.tfstate",
+            ]
+          }
+        }
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:GetObject", "s3:PutObject"]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner/production/terraform.tfstate"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner/production/terraform.tfstate.tflock"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["s3:GetObject"]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner-env/terraform.tfstate"
+      }
+    ]
+  })
+}
 
 
 
