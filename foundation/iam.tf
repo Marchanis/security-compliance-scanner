@@ -25,6 +25,10 @@ resource "aws_iam_role" "github_actions_ci" {
   )
 }
 
+resource "aws_iam_role_policy_attachment" "permission_policy" {
+  role       = aws_iam_role.github_actions_ci.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
 
 resource "aws_iam_role_policy" "artifact_role" {
   name = "artifact-s3-access-role"
