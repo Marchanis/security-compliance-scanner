@@ -19,6 +19,7 @@ module "scanner" {
   environment    = "dev"
   topic_name     = "dev_scanner_alert"
   sns_email      = var.sns_email
+  permissions_boundary_arn = data.terraform_remote_state.foundation.outputs.dev_permission_boundary_arn
 
 }
 
