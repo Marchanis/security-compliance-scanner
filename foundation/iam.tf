@@ -75,7 +75,8 @@ resource "aws_iam_role_policy" "ci_environment_state_access" {
         ]
         Resource = [
           "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner/dev/terraform.tfstate.tflock",
-          "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner/production/terraform.tfstate.tflock"
+          "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner/production/terraform.tfstate.tflock",
+          "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner-env/terraform.tfstate.tflock",
         ]
       },
       {
