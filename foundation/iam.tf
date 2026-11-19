@@ -622,7 +622,8 @@ resource "aws_iam_role_policy" "dev_service_permissions" {
           "lambda:DeleteFunction",
           "lambda:CreateFunction",
           "lambda:GetFunctionConfiguration",
-          "lambda:UpdateFunctionConfiguration"
+          "lambda:UpdateFunctionConfiguration",
+          "lambda:ListVersionsByFunction",
         ]
         Resource = "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:security-scanner-dev"
 
@@ -647,7 +648,8 @@ resource "aws_iam_role_policy" "dev_service_permissions" {
           "sns:DeleteTopic",
           "sns:ListSubscriptionsByTopic",
           "sns:SetTopicAttributes",
-          "sns:ListTagsForResource"
+          "sns:ListTagsForResource",
+          "sns:GetSubscriptionAttributes",
 
 
 
@@ -686,7 +688,8 @@ resource "aws_iam_role_policy" "production_service_permissions" {
           "lambda:DeleteFunction",
           "lambda:CreateFunction",
           "lambda:GetFunctionConfiguration",
-          "lambda:UpdateFunctionConfiguration"
+          "lambda:UpdateFunctionConfiguration",
+          "lambda:ListVersionsByFunction",
         ]
         Resource = "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:security-scanner-production"
       },
@@ -710,7 +713,8 @@ resource "aws_iam_role_policy" "production_service_permissions" {
           "sns:DeleteTopic",
           "sns:ListSubscriptionsByTopic",
           "sns:SetTopicAttributes",
-          "sns:ListTagsForResource"
+          "sns:ListTagsForResource",
+          "sns:GetSubscriptionAttributes",
 
         ]
         Resource = "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:production_scanner_alert"
