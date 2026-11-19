@@ -19,7 +19,7 @@ module "dev_scanner" {
   environment    = "dev"
   topic_name     = "dev_scanner_alert"
   sns_email      = var.sns_email
-  # permissions_boundary_arn = data.terraform_remote_state.foundation.outputs.dev_permission_boundary_arn
+  permissions_boundary_arn = data.terraform_remote_state.foundation.outputs.dev_permission_boundary_arn
 
 
 }
@@ -31,7 +31,7 @@ module "production_scanner" {
   environment    = "production"
   topic_name     = "production_scanner_alert"
   sns_email      = var.sns_email
-  # permissions_boundary_arn = data.terraform_remote_state.foundation.outputs.production_permission_boundary_arn
+  permissions_boundary_arn = data.terraform_remote_state.foundation.outputs.production_permission_boundary_arn
 
 
 }
