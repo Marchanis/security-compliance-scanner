@@ -9,7 +9,7 @@ def check_iam_mfa():
         u_iam = iam.list_users()
     except ClientError as e :
         print(f" AWS rejected the request: {e}")
-        return []
+        return {'NO_MFA_Users': [], 'error': str(e)}
     
     
     no_mfauser = []
@@ -27,7 +27,7 @@ def check_iam_mfa():
 
                 })
         except ClientError as e:
-            print (f"Username {user['Name']} failed : {e}")
+            print (f"Username {user['UserName']} failed : {e}")
             
 
     result = {

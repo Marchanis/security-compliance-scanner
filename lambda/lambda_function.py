@@ -20,11 +20,11 @@ def lambda_handler(event, context):
 
     sns = boto3.client('sns')
     
-    messgae = str(result)
+    message = str(result)
     
     sns.publish(
         TopicArn = os.environ['SNS_TOPIC_ARN'],
-        Message = messgae,
+        Message = message,
         Subject = 'Security compliance scanner'
     )
     

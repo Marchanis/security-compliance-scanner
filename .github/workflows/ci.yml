@@ -1,17 +1,69 @@
 name: CI
 on:
   pull_request:
-    branches: [main]
+    branches: 
+      - main
+
+
+permissions: 
+#  id-token: write 
+  contents: read
+
+concurrency: 
+  group: terraform-scanner
+  cancel-in-progress: false 
+
 
 jobs: 
-  test: 
+  foundation :
+    name: "Foundation Format and Validate"
     runs-on: ubuntu-latest
+  
+    defaults:
+      run:
+        working-directory: foundation
 
     steps: 
-    - uses: actions/checkout@v7
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
 
-    - run: pip install boto3
-    - run: pip install -U pytest
+      # - name: Debug GitHub OIDC claims
+      #   uses: actions/github-script@v7
+      #   with:
+      #     script: |
+      #       const token = await core.getIDToken('sts.amazonaws.com');
+      #       const payload = JSON.parse(
+      #         Buffer.from(token.split('.')[1], 'base64url').toString()
+      #       );
 
-    - run: pytest
+      #       console.log("OIDC audience:", payload.aud);
+      #       console.log("OIDC subject:", payload.sub);
+      #       console.log("OIDC issuer:", payload.iss);
+              
+      
+      # - name: Configure AWS Credentials (OIDC)
+      #   uses: aws-actions/configure-aws-credentials@v4
+      #   with:
+      #     role-to-assume: arn:aws:iam::889992886230:role/github-action-oidc
+      #     aws-region: us-east-1
+
+      - name: Setup Terraform 
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform init 
+        run: terraform init -backend=false -input=false
+
+      
+      - name: Terraform Format & Validate
+        run: |
+
+          terraform fmt -check -recursive
+          terraform validate
+      
+      # - name: Terraform Plan 
+      #   run: terraform plan -input=false
+        
+    
+      
+  

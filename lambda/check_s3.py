@@ -7,8 +7,8 @@ def check_public_buckets():
     
     try : 
         list_b = s3.list_buckets()
-    except ClientError :
-        raise 
+    except ClientError as e:
+        return {'Public_bucket': [], 'error': str(e)}
 
 
     public_bucket = []
@@ -20,9 +20,10 @@ def check_public_buckets():
                 public_bucket.append({
                     'Name': bucket['Name'],
                     'CreationDate': bucket['CreationDate'],
-                    'BucketArn': bucket ['BucketArn']
+                    'BucketArn': f"arn:aws:s3:::{bucket['Name']}"
             })
-        except  ClientError : 
+        except ClientError as e:
+            print(f"Could not check bucket {bucket['Name']}: {e}")
             continue
                 
                 

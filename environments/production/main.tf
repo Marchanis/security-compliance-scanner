@@ -1,0 +1,33 @@
+
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+}
+
+module "scanner" {
+  source         = "../../modules/scanner"
+  function_name  = "security-scanner-production"
+  lambda_timeout = 60
+  environment    = "production"
+  topic_name     = "production_scanner_alert"
+  sns_email      = var.sns_email
+
+}
+
+data "terraform_remote_state" "foundation" {
+  backend = "s3"
+
+  config = {
+    bucket = "flask-terraform-state-sall"
+    key    = "security-compliance-scanner-env/terraform.tfstate"
+    region = "us-east-1"
+  }
+}

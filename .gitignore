@@ -1,9 +1,10 @@
 .terraform/
 terraform.tfstate
 terraform.tfstate.backup 
-terragform.tfvars
+terraform.tfvars
 lambda.zip
 output.json
 security-compliance-scanner-notes.md
 __pycache__
 .pytest_cache/
+.venv/
