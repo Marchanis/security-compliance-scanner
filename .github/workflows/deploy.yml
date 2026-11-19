@@ -98,6 +98,8 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     needs: dev
+    env:
+      TF_VAR_sns_email: ${{ vars.sns_email }}
     defaults:
       run:
         working-directory: environments/production
