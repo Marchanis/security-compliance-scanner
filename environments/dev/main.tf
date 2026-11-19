@@ -18,7 +18,7 @@ module "scanner" {
   lambda_timeout = 60
   environment    = "dev"
   topic_name     = "dev_scanner_alert"
-  sns_email      = var.SNS_EMAIL
+  sns_email      = var.sns_email
 
 }
 

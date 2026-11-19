@@ -67,7 +67,7 @@ jobs:
     environment: dev
     needs: foundation
     env:
-      TF_VAR_sns_email: ${{ vars.SNS_EMAIL }}
+      TF_VAR_sns_email: ${{ vars.sns_email }}
 
     defaults:
       run:
