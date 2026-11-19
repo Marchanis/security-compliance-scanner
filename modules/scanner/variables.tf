@@ -19,7 +19,7 @@ variable "topic_name" {
   type        = string
 }
 
-variable "sns_email" {
+variable "SNS_EMAIL" {
   description = "SNS subscription email"
   type        = string
 }
