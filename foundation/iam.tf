@@ -624,6 +624,7 @@ resource "aws_iam_role_policy" "dev_service_permissions" {
           "lambda:GetFunctionConfiguration",
           "lambda:UpdateFunctionConfiguration",
           "lambda:ListVersionsByFunction",
+          "lambda:GetFunctionCodeSigningConfig",
         ]
         Resource = "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:security-scanner-dev"
 
@@ -690,6 +691,7 @@ resource "aws_iam_role_policy" "production_service_permissions" {
           "lambda:GetFunctionConfiguration",
           "lambda:UpdateFunctionConfiguration",
           "lambda:ListVersionsByFunction",
+          "lambda:GetFunctionCodeSigningConfig",
         ]
         Resource = "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:security-scanner-production"
       },
