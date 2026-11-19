@@ -13,7 +13,7 @@ resource "aws_iam_role" "github_actions_ci" {
         },
         Condition = {
           StringEquals = {
-            "token.actions.githubusercontent.com:sub" = "repo:Marchanis@118909843/security-compliance-scanner@1311031454:pull_request",
+            "token.actions.githubusercontent.com:sub" = "repo:Marchanis@118909843/security-compliance-scanner@1311031454:environment:foundation",
             "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
           }
         }
@@ -333,6 +333,35 @@ resource "aws_iam_role" "production_deployment" {
   )
 }
 
+resource "aws_iam_role" "foundation_deployment" {
+  name = "security-compliance-scanner-foundation-deployment"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "sts:AssumeRoleWithWebIdentity"
+
+        Principal = {
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
+        }
+
+        Condition = {
+          StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+            "token.actions.githubusercontent.com:sub" = "repo:Marchanis@118909843/security-compliance-scanner@1311031454:environment:foundation"
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "foundation_admin_bootstrap" {
+  role       = aws_iam_role.foundation_deployment.name
+  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
+}
 
 
 resource "aws_iam_role_policy" "pro_permission_artifact" {

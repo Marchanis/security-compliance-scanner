@@ -16,9 +16,12 @@ concurrency:
 
 
 jobs: 
-  dev:
+  foundation: 
+    defaults:
+      run:
+        working-directory: foundation
     runs-on: ubuntu-latest
-    environment: dev 
+    environment: foundation 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -37,14 +40,82 @@ jobs:
             console.log("OIDC audience:", payload.aud);
             console.log("OIDC subject:", payload.sub);
             console.log("OIDC issuer:", payload.iss);
-  
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::889992886230:role/github-action-oidc
+          aws-region: us-east-1
+
+      - name: Terraform init 
+        run: terraform init -input=false
+
+      - name: Terraform Format & Validate
+        run: |
+          terraform fmt -check -recursive
+          terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -input=false tfplan
+      
+
+  dev:
+    runs-on: ubuntu-latest
+    environment: dev
+    needs: foundation
+    defaults:
+      run:
+          working-directory: environments/dev
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::889992886230:role/security-compliance-scanner-dev-deployment
+          aws-region: us-east-1
+
+      - name: Terraform Init
+        run: terraform init  -input=false  
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -input=false tfplan
+
   production:
     runs-on: ubuntu-latest
     environment: production
     needs: dev
+    defaults:
+      run:
+        working-directory: environments/production
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
-      
-      - name: Setup Terraform 
+
+      - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::889992886230:role/security-compliance-scanner-production-deployment
+          aws-region: us-east-1
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Plan
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Terraform Apply
+        run: terraform apply -input=false tfplan
