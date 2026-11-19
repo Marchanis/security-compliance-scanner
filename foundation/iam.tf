@@ -651,6 +651,7 @@ resource "aws_iam_role_policy" "dev_service_permissions" {
           "sns:SetTopicAttributes",
           "sns:ListTagsForResource",
           "sns:GetSubscriptionAttributes",
+          "sns:Unsubscribe",
 
 
 
