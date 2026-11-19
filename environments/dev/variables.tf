@@ -5,7 +5,7 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
-variable "sns_email" {
+variable "SNS_EMAIL" {
   description = "Email address for Dev scanner alerts"
   type        = string
   sensitive   = true
