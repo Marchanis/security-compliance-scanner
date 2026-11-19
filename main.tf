@@ -18,7 +18,7 @@ module "dev_scanner" {
   lambda_timeout = 60
   environment    = "dev"
   topic_name     = "dev_scanner_alert"
-  sns_email      = var.sns_email
+  sns_email      = var.SNS_EMAIL
   # permissions_boundary_arn = data.terraform_remote_state.foundation.outputs.dev_permission_boundary_arn
 
 
@@ -30,7 +30,7 @@ module "production_scanner" {
   lambda_timeout = 60
   environment    = "production"
   topic_name     = "production_scanner_alert"
-  sns_email      = var.sns_email
+  sns_email      = var.SNS_EMAIL
   # permissions_boundary_arn = data.terraform_remote_state.foundation.outputs.production_permission_boundary_arn
 
 
