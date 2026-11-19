@@ -647,6 +647,7 @@ resource "aws_iam_role_policy" "dev_service_permissions" {
           "sns:DeleteTopic",
           "sns:ListSubscriptionsByTopic",
           "sns:SetTopicAttributes",
+          "sns:ListTagsForResource"
 
 
 
@@ -709,6 +710,8 @@ resource "aws_iam_role_policy" "production_service_permissions" {
           "sns:DeleteTopic",
           "sns:ListSubscriptionsByTopic",
           "sns:SetTopicAttributes",
+          "sns:ListTagsForResource"
+
         ]
         Resource = "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:production_scanner_alert"
       },
