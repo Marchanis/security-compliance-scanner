@@ -3,6 +3,8 @@ resource "aws_scheduler_schedule" "weekly_schedule" {
   description = "Weekly schedule to trigger the lambda function"
   group_name  = "default"
 
+  state = "DISABLED"
+
   schedule_expression          = "cron(0 8 ? * TUE *)"
   schedule_expression_timezone = "Africa/Casablanca"
 
