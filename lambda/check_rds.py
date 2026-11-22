@@ -7,16 +7,17 @@ def check_rds_encryption():
     
     try : 
         d_rds = rds.describe_db_instances()
-    except ClientError as e :
+    except ClientError as e:
         print(f"AWS rejected the request: {e}")
         return {
             'RDS_unencrypted': [],
             'Publicly_Accesible': [],
-            'error': str(e)
+            'errors': [str(e)]
         }
     
     rds_unencrypted = []
     publicly_accessible = []
+    errors = []
     
     for enc_rds in d_rds["DBInstances"]:  
                 if not enc_rds["StorageEncrypted"]:
@@ -36,7 +37,8 @@ def check_rds_encryption():
             
     result = {
         'RDS_unencrypted' : rds_unencrypted,
-        'Publicly_Accesible' : publicly_accessible
+        'Publicly_Accesible' : publicly_accessible,
+        'errors': errors
         
     }
     
