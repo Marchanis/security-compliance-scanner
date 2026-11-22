@@ -26,12 +26,18 @@ def check_public_buckets():
                     'CreationDate': bucket['CreationDate'],
                     'BucketArn': f"arn:aws:s3:::{bucket['Name']}"
             })
-        except ClientError as e:
-            error = f"Could not check bucket {bucket['Name']}: {e}"
-            errors.append(error)
-            print(error)
-            continue
                 
+        except ClientError as e:
+            error_code = e.response['Error']['Code']
+
+            if error_code == "NoSuchBucketPolicy":
+                continue
+
+            else:
+                error = f"Could not check bucket {bucket['Name']}: {e}"
+                errors.append(error)
+                print(error)
+
                 
     result = {
             'Public_bucket': public_bucket,
