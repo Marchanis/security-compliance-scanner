@@ -7,19 +7,23 @@ def check_iam_mfa():
     
     try :
         u_iam = iam.list_users()
-    except ClientError as e :
-        print(f" AWS rejected the request: {e}")
-        return {'NO_MFA_Users': [], 'error': str(e)}
+    except ClientError as e:
+        print(f"AWS rejected the request: {e}")
+        return {
+            'NO_MFA_Users': [],
+            'errors': [str(e)]
+        }
     
     
-    no_mfauser = []
+    no_mfa_user = []
+    errors = []
 
 
     for user in u_iam['Users']:
         try : 
             no_mfa_users= iam.list_mfa_devices(UserName=user['UserName'])
             if not no_mfa_users['MFADevices']:
-                no_mfauser.append({
+                no_mfa_user.append({
                     'UserName' : user ['UserName'],
                     'UserId' : user ['UserId'],
                     'Arn' : user ['Arn'],
@@ -27,11 +31,13 @@ def check_iam_mfa():
 
                 })
         except ClientError as e:
-            print (f"Username {user['UserName']} failed : {e}")
-            
+            error = f"Username {user['UserName']} failed: {e}"
+            errors.append(error)
+            print(error)
 
     result = {
-        'NO_MFA_Users' : no_mfauser
+        'NO_MFA_Users' : no_mfa_user,
+        'errors': errors
     }
     return result
 

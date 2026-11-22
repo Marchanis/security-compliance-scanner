@@ -13,12 +13,12 @@ provider "aws" {
 }
 
 module "scanner" {
-  source         = "../../modules/scanner"
-  function_name  = "security-scanner-production"
-  lambda_timeout = 60
-  environment    = "production"
-  topic_name     = "production_scanner_alert"
-  sns_email      = var.sns_email
+  source                   = "../../modules/scanner"
+  function_name            = "security-scanner-production"
+  lambda_timeout           = 60
+  environment              = "production"
+  topic_name               = "production_scanner_alert"
+  sns_email                = var.sns_email
   permissions_boundary_arn = data.terraform_remote_state.foundation.outputs.production_permission_boundary_arn
 
 }

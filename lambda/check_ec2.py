@@ -6,13 +6,17 @@ def check_ec2_sg():
     
     try :
         d_ins = ec2.describe_security_groups()                                                                      
-    except ClientError as e :
+    except ClientError as e:
         print(f"AWS rejected the request: {e}")
-        return {'Security_Group': [], 'All_Traffic': [], 'error': str(e)}
-            
+        return {
+            'Security_Group': [],
+            'All_Traffic': [],
+            'errors': [str(e)]
+        }
     
     public_sg = []
     all_traffic = []
+    errors = []
 
     
     for sg in d_ins ['SecurityGroups']:
@@ -38,7 +42,8 @@ def check_ec2_sg():
                         })
     result = {
         'Security_Group': public_sg,
-        'All_Traffic': all_traffic
+        'All_Traffic': all_traffic,
+        'errors': errors
     }
     
     return result
