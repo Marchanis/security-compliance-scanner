@@ -6,5 +6,6 @@ lambda.zip
 output.json
 security-compliance-scanner-notes.md
 __pycache__
+*.pyc
 .pytest_cache/
 .venv/
