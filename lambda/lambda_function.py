@@ -29,7 +29,7 @@ def lambda_handler(event, context):
         'S3': result['checking_s3']['errors'],
         'RDS': result['checking_rds']['errors']
     }
-
+  
     has_findings = any(findings.values())
     has_errors = any(errors.values())
 
@@ -59,6 +59,7 @@ def lambda_handler(event, context):
         print("Security scan completed successfully. No findings or errors.")
     print(result)
     return result
+       
     
 if __name__ == "__main__":
     result = lambda_handler({}, None)

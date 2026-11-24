@@ -10,6 +10,7 @@ def check_ec2_sg():
         paginator = ec2.get_paginator('describe_security_groups')
 
         all_sgs = []
+        
 
         for page in paginator.paginate():
             all_sgs.extend(page['SecurityGroups'])
