@@ -11,10 +11,13 @@ def test_lambda_handler_runs_checks_and_publishes_sns():
          patch('lambda_function.boto3.client') as boto_mock, \
          patch.dict('os.environ', {'SNS_TOPIC_ARN': 'arn:aws:sns:us-east-1:123:security-alerts'}):
 
-        iam_mock.return_value = {'NO_MFA_Users': []}
-        ec2_mock.return_value = {'Security_Group': [], 'All_Traffic': []}
-        s3_mock.return_value = {'Public_bucket': []}
-        rds_mock.return_value = {'RDS_unencrypted': [], 'Publicly_Accesible': []}
+        iam_mock.return_value = {'NO_MFA_Users': [], 'errors': []}
+        ec2_mock.return_value = {'Security_Group': [], 'All_Traffic': [] , 'errors': []}
+        s3_mock.return_value = {
+            'Public_bucket': [{'Name': 'test-bucket', 'CreationDate': '2024-01-01', 'BucketArn': 'arn:aws:s3:::test-bucket'}],
+            'errors': []
+        }
+        rds_mock.return_value = {'RDS_unencrypted': [], 'Publicly_Accesible': [], 'errors': []}
 
         fake_sns = MagicMock()
         boto_mock.return_value = fake_sns

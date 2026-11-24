@@ -4,7 +4,6 @@ from botocore.exceptions import ClientError
 
 
 def test_flags_only_public_bucket():
-    # ARRANGE: build the fake AWS
     fake_s3 = MagicMock()
     fake_s3.list_buckets.return_value = {
         'Buckets': [
@@ -18,13 +17,12 @@ def test_flags_only_public_bucket():
 
     fake_s3.get_bucket_policy_status.side_effect = fake_status
 
-    # ACT: run your function, with the fake in place of real AWS
     with patch('check_s3.boto3.client', return_value=fake_s3):
         result = check_public_buckets()
 
-    # ASSERT: your part
 
-    assert result == {'Public_bucket': [{'Name': 'bucket-one', 'CreationDate': '2024-01-01', 'BucketArn': 'arn:aws:s3:::bucket-one'}]}
+    assert result == {'Public_bucket':  [{'Name': 'bucket-one', 'CreationDate': '2024-01-01', 'BucketArn': 'arn:aws:s3:::bucket-one'}],
+                      'errors': []}
 
     assert len(result['Public_bucket']) == 1
     
@@ -47,7 +45,8 @@ def test_list_buckets_error():
         result = check_public_buckets()
 
     assert result['Public_bucket'] == []
-    assert 'error' in result
+    assert 'errors' in result
+    assert 'AccessDenied' in result['errors'][0]
     
     
 def test_bucket_policy_error():

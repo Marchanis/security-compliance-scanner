@@ -5,7 +5,7 @@ from check_ec2 import check_ec2_sg
 def test_detects_public_ssh_access():
     fake_ec2 = MagicMock()
 
-    fake_ec2.describe_security_groups.return_value = {
+    fake_ec2.get_paginator.return_value.paginate.return_value = [{
         'SecurityGroups': [
             {
                 'GroupId': 'sg-123',
@@ -22,7 +22,7 @@ def test_detects_public_ssh_access():
                 ]
             }
         ]
-    }
+    }]
 
     with patch('check_ec2.boto3.client', return_value=fake_ec2):
         result = check_ec2_sg()
@@ -36,7 +36,7 @@ def test_detects_public_ssh_access():
 def test_detects_all_traffic_open_to_internet():
     fake_ec2 = MagicMock()
 
-    fake_ec2.describe_security_groups.return_value = {
+    fake_ec2.get_paginator.return_value.paginate.return_value = [{
         'SecurityGroups': [
             {
                 'GroupId': 'sg-456',
@@ -51,7 +51,7 @@ def test_detects_all_traffic_open_to_internet():
                 ]
             }
         ]
-    }
+    }]
 
     with patch('check_ec2.boto3.client', return_value=fake_ec2):
         result = check_ec2_sg()
