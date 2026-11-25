@@ -25,11 +25,6 @@ resource "aws_iam_role" "github_actions_ci" {
   )
 }
 
-resource "aws_iam_role_policy_attachment" "permission_policy" {
-  role       = aws_iam_role.github_actions_ci.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-}
-
 resource "aws_iam_role_policy" "artifact_role" {
   name = "artifact-s3-access-role"
   role = aws_iam_role.github_actions_ci.id
@@ -358,12 +353,6 @@ resource "aws_iam_role" "foundation_deployment" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "foundation_admin_bootstrap" {
-  role       = aws_iam_role.foundation_deployment.name
-  policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
-}
-
-
 resource "aws_iam_role_policy" "pro_permission_artifact" {
   name = "production-artifact-s3-read"
   role = aws_iam_role.production_deployment.id
@@ -382,6 +371,159 @@ resource "aws_iam_role_policy" "pro_permission_artifact" {
     ]
   })
 }
+
+resource "aws_iam_role" "foundation_restricted" {
+  name = "security-compliance-scanner-foundation-restricted"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = "sts:AssumeRoleWithWebIdentity"
+
+        Principal = {
+          Federated = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:oidc-provider/token.actions.githubusercontent.com"
+        }
+
+        Condition = {
+          StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+            "token.actions.githubusercontent.com:sub" = "repo:Marchanis@118909843/security-compliance-scanner@1311031454:environment:foundation"
+          }
+        }
+      }
+    ]
+  })
+}
+
+
+resource "aws_iam_role_policy" "foundation_backend_access" {
+  name = "foundation-backend-access"
+  role = aws_iam_role.foundation_restricted.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ListFoundationStatePath"
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket"
+        ]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall"
+        Condition = {
+          StringLike = {
+            "s3:prefix" = [
+              "security-compliance-scanner-env/terraform.tfstate",
+              "security-compliance-scanner-env/terraform.tfstate.tflock"
+            ]
+          }
+        }
+      },
+      {
+        Sid    = "AccessFoundationState"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject"
+        ]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner-env/terraform.tfstate"
+      },
+      {
+        Sid    = "ManageFoundationLock"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject"
+        ]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner-env/terraform.tfstate.tflock"
+      }
+    ]
+  })
+}
+
+
+resource "aws_iam_role_policy" "foundation_artifact_bucket_access" {
+  name = "foundation-artifact-bucket-access"
+  role = aws_iam_role.foundation_restricted.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "CreateAndInspectArtifactBucket"
+        Effect = "Allow"
+        Action = [
+          "s3:CreateBucket",
+          "s3:GetBucketLocation",
+          "s3:GetBucketAcl",
+          "s3:ListBucket"
+        ]
+        Resource = "arn:aws:s3:::sal-security-compliance-artifacts"
+      },
+      {
+        Sid    = "ManageArtifactBucketSecurity"
+        Effect = "Allow"
+        Action = [
+          "s3:GetBucketVersioning",
+          "s3:PutBucketVersioning",
+          "s3:GetBucketPublicAccessBlock",
+          "s3:PutBucketPublicAccessBlock",
+          "s3:GetEncryptionConfiguration",
+          "s3:PutEncryptionConfiguration",
+          "s3:GetBucketPolicy",
+          "s3:PutBucketPolicy"
+        ]
+        Resource = "arn:aws:s3:::sal-security-compliance-artifacts"
+      }
+    ]
+  })
+}
+
+
+resource "aws_iam_role_policy" "foundation_iam_read" {
+  name = "foundation-iam-read-access"
+  role = aws_iam_role.foundation_restricted.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ReadProjectRoles"
+        Effect = "Allow"
+        Action = [
+          "iam:GetRole",
+          "iam:GetRolePolicy",
+          "iam:ListRolePolicies",
+          "iam:ListAttachedRolePolicies"
+        ]
+        Resource = [
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/github-action-oidc",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-*",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security_compliance_scheduler_role_*"
+        ]
+      },
+      {
+        Sid    = "ReadProjectPolicies"
+        Effect = "Allow"
+        Action = [
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:ListPolicyVersions"
+        ]
+        Resource = [
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/security-compliance-scanner-*",
+          "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+          "arn:aws:iam::aws:policy/AdministratorAccess"
+        ]
+      }
+    ]
+  })
+}
+
+
 
 
 resource "aws_iam_role_policy" "production_iam_permissions" {
