@@ -495,7 +495,7 @@ resource "aws_iam_role_policy" "foundation_artifact_bucket_access" {
         ]
         Resource = "arn:aws:s3:::sal-security-compliance-artifacts"
       },
-            {
+      {
         Sid    = "ReadArtifactBucketSettings"
         Effect = "Allow"
         Action = [
