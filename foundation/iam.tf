@@ -422,6 +422,15 @@ resource "aws_iam_role_policy" "foundation_backend_access" {
         }
       },
       {
+        Sid    = "InspectStateBucket"
+        Effect = "Allow"
+        Action = [
+          "s3:GetBucketLocation",
+          "s3:GetBucketVersioning"
+        ]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall"
+      },
+      {
         Sid    = "AccessFoundationState"
         Effect = "Allow"
         Action = [
@@ -439,7 +448,15 @@ resource "aws_iam_role_policy" "foundation_backend_access" {
           "s3:DeleteObject"
         ]
         Resource = "arn:aws:s3:::flask-terraform-state-sall/security-compliance-scanner-env/terraform.tfstate.tflock"
-      }
+      },
+      {
+        Sid    = "ManageStateBucketVersioning"
+        Effect = "Allow"
+        Action = [
+          "s3:PutBucketVersioning"
+        ]
+        Resource = "arn:aws:s3:::flask-terraform-state-sall"
+      },
     ]
   })
 }
