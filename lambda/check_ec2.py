@@ -2,6 +2,7 @@
 import boto3
 from botocore.exceptions import ClientError
 
+RISKY_PORTS = [22, 3389, 5432]
 
 def check_ec2_sg():
     ec2 = boto3.client('ec2')
@@ -41,7 +42,7 @@ def check_ec2_sg():
 
                 elif (
                     permission["IpProtocol"] == "tcp"
-                    and permission.get("FromPort", -1) <= 22 <= permission.get("ToPort", -1)
+                    and any(permission.get("FromPort", -1) <= port <= permission.get("ToPort", -1) for port in RISKY_PORTS)
                     and ip_range["CidrIp"] == "0.0.0.0/0"
                 ):
                     public_sg.append({
@@ -62,7 +63,7 @@ def check_ec2_sg():
 
                 elif (
                     permission["IpProtocol"] == "tcp"
-                    and permission.get("FromPort", -1) <= 22 <= permission.get("ToPort", -1)
+                    and any(permission.get("FromPort", -1) <= port <= permission.get("ToPort", -1) for port in RISKY_PORTS)
                     and ip_range6["CidrIpv6"] == "::/0"
                 ):
                     public_sg.append({

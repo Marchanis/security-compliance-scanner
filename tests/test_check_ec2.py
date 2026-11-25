@@ -60,3 +60,70 @@ def test_detects_all_traffic_open_to_internet():
     assert result['All_Traffic'][0]['GroupId'] == 'sg-456'
     assert result['All_Traffic'][0]['CidrIp'] == '0.0.0.0/0'
     assert result['Security_Group'] == []
+    
+    
+    
+    
+
+def test_detects_public_rdp_access():
+    fake_ec2 = MagicMock()
+
+    fake_ec2.get_paginator.return_value.paginate.return_value = [{
+        'SecurityGroups': [
+            {
+                'GroupId': 'sg-789',
+                'GroupName': 'public-rdp',
+                'IpPermissions': [
+                    {
+                        'IpProtocol': 'tcp',
+                        'FromPort': 3389,
+                        'ToPort': 3389,
+                        'IpRanges': [
+                            {'CidrIp': '0.0.0.0/0'}
+                        ]
+                    }
+                ]
+            }
+        ]
+    }]
+
+    with patch('check_ec2.boto3.client', return_value=fake_ec2):
+        result = check_ec2_sg()
+
+    assert len(result['Security_Group']) == 1
+    assert result['Security_Group'][0]['GroupId'] == 'sg-789'
+    assert result['Security_Group'][0]['FromPort'] == 3389
+    assert result['All_Traffic'] == []
+    
+
+
+
+def test_detects_public_rdp_access_ipv6():
+    fake_ec2 = MagicMock()
+
+    fake_ec2.get_paginator.return_value.paginate.return_value = [{
+        'SecurityGroups': [
+            {
+                'GroupId': 'sg-ipv6',
+                'GroupName': 'public-rdp-ipv6',
+                'IpPermissions': [
+                    {
+                        'IpProtocol': 'tcp',
+                        'FromPort': 3389,
+                        'ToPort': 3389,
+                        'IpRanges': [],
+                        'Ipv6Ranges': [
+                            {'CidrIpv6': '::/0'}
+                        ]
+                    }
+                ]
+            }
+        ]
+    }]
+
+    with patch('check_ec2.boto3.client', return_value=fake_ec2):
+        result = check_ec2_sg()
+
+    assert len(result['Security_Group']) == 1
+    assert result['Security_Group'][0]['GroupId'] == 'sg-ipv6'
+    assert result['Security_Group'][0]['CidrIpv6'] == '::/0'
