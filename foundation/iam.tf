@@ -494,6 +494,22 @@ resource "aws_iam_role_policy" "foundation_artifact_bucket_access" {
           "s3:PutBucketPolicy"
         ]
         Resource = "arn:aws:s3:::sal-security-compliance-artifacts"
+      },
+            {
+        Sid    = "ReadArtifactBucketSettings"
+        Effect = "Allow"
+        Action = [
+          "s3:GetBucketCORS",
+          "s3:GetBucketWebsite",
+          "s3:GetAccelerateConfiguration",
+          "s3:GetBucketRequestPayment",
+          "s3:GetBucketLogging",
+          "s3:GetLifecycleConfiguration",
+          "s3:GetReplicationConfiguration",
+          "s3:GetBucketObjectLockConfiguration",
+          "s3:GetBucketTagging"
+        ]
+        Resource = "arn:aws:s3:::sal-security-compliance-artifacts"
       }
     ]
   })
