@@ -640,7 +640,7 @@ resource "aws_iam_policy" "dev_lambda_boundary" {
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents",
-          
+
         ]
         Resource = "*"
 
@@ -718,7 +718,7 @@ resource "aws_iam_policy" "production_lambda_boundary" {
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents",
-          
+
         ]
         Resource = "*"
 
