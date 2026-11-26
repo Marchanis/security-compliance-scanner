@@ -23,6 +23,12 @@ module "scanner" {
 
 }
 
+import {
+  to = module.scanner.aws_cloudwatch_log_group.lambda_logs
+  id = "/aws/lambda/security-scanner-production"
+}
+
+
 data "terraform_remote_state" "foundation" {
   backend = "s3"
 
