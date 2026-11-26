@@ -639,7 +639,8 @@ resource "aws_iam_policy" "dev_lambda_boundary" {
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
-          "logs:PutLogEvents"
+          "logs:PutLogEvents",
+
         ]
         Resource = "*"
 
@@ -716,7 +717,8 @@ resource "aws_iam_policy" "production_lambda_boundary" {
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
-          "logs:PutLogEvents"
+          "logs:PutLogEvents",
+
         ]
         Resource = "*"
 
@@ -842,6 +844,13 @@ resource "aws_iam_role_policy" "dev_service_permissions" {
           "sns:GetSubscriptionAttributes"
         ]
         Resource = "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:dev_scanner_alert:*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:DescribeLogGroups"
+        ]
+        Resource = "*"
       }
 
     ]
@@ -904,6 +913,13 @@ resource "aws_iam_role_policy" "production_service_permissions" {
           "sns:GetSubscriptionAttributes"
         ]
         Resource = "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:production_scanner_alert:*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:DescribeLogGroups"
+        ]
+        Resource = "*"
       }
     ]
 
