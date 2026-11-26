@@ -556,6 +556,28 @@ resource "aws_iam_role_policy" "foundation_iam_read" {
   })
 }
 
+resource "aws_iam_role_policy" "foundation_deployment_role_management" {
+  name = "foundation-deployment-role-management"
+  role = aws_iam_role.foundation_restricted.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "ManageDevAndProductionDeploymentPolicies"
+        Effect = "Allow"
+        Action = [
+          "iam:PutRolePolicy",
+          "iam:DeleteRolePolicy"
+        ]
+        Resource = [
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-dev-deployment",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-production-deployment"
+        ]
+      }
+    ]
+  })
+}
 
 
 
