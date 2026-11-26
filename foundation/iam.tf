@@ -264,11 +264,9 @@ resource "aws_iam_role_policy" "dev_iam_permissions" {
           "iam:DeleteRole",
           "iam:DeleteRolePolicy",
           "iam:PutRolePolicy",
-          "iam:UpdateAssumeRolePolicy",
-          "iam:DetachRolePolicy",
         ]
         Resource = [
-          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-dev-*",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-dev-lambda-role",
           "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security_compliance_scheduler_role_dev"
         ]
 
@@ -289,6 +287,18 @@ resource "aws_iam_role_policy" "dev_iam_permissions" {
         Effect = "Allow"
         Action = [
           "iam:AttachRolePolicy"
+        ]
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-dev-lambda-role"
+        Condition = {
+          StringEquals = {
+            "iam:PolicyARN" = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+          }
+        }
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:DetachRolePolicy"
         ]
         Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-dev-lambda-role"
         Condition = {
@@ -618,11 +628,9 @@ resource "aws_iam_role_policy" "production_iam_permissions" {
           "iam:DeleteRole",
           "iam:DeleteRolePolicy",
           "iam:PutRolePolicy",
-          "iam:UpdateAssumeRolePolicy",
-          "iam:DetachRolePolicy",
         ]
         Resource = [
-          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-production-*",
+          "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-production-lambda-role",
           "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security_compliance_scheduler_role_production"
         ]
 
@@ -643,6 +651,18 @@ resource "aws_iam_role_policy" "production_iam_permissions" {
         Effect = "Allow"
         Action = [
           "iam:AttachRolePolicy"
+        ]
+        Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-production-lambda-role"
+        Condition = {
+          StringEquals = {
+            "iam:PolicyARN" = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+          }
+        }
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:DetachRolePolicy"
         ]
         Resource = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/security-compliance-scanner-production-lambda-role"
         Condition = {
