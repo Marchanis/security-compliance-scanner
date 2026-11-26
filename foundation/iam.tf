@@ -639,7 +639,8 @@ resource "aws_iam_policy" "dev_lambda_boundary" {
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
-          "logs:PutLogEvents"
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups"
         ]
         Resource = "*"
 
@@ -716,7 +717,8 @@ resource "aws_iam_policy" "production_lambda_boundary" {
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
-          "logs:PutLogEvents"
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups"
         ]
         Resource = "*"
 
