@@ -878,6 +878,13 @@ resource "aws_iam_role_policy" "dev_service_permissions" {
           "logs:DescribeLogGroups"
         ]
         Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:ListTagsForResource"
+        ]
+        Resource = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/security-scanner-dev"
       }
 
     ]
@@ -947,6 +954,13 @@ resource "aws_iam_role_policy" "production_service_permissions" {
           "logs:DescribeLogGroups"
         ]
         Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:ListTagsForResource"
+        ]
+        Resource = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/security-scanner-production"
       }
     ]
 
