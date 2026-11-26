@@ -564,7 +564,7 @@ resource "aws_iam_role_policy" "foundation_deployment_role_management" {
     Version = "2012-10-17"
     Statement = [
       {
-        Sid    = "ManageDevAndProductionDeploymentPolicies"
+        Sid    = "ManageDeploymentRolePolicies"
         Effect = "Allow"
         Action = [
           "iam:PutRolePolicy",
