@@ -580,6 +580,11 @@ resource "aws_iam_role_policy" "foundation_deployment_role_management" {
 }
 
 
+import {
+  to = aws_iam_role_policy.foundation_deployment_role_management
+  id = "security-compliance-scanner-foundation-restricted:foundation-deployment-role-management"
+}
+
 
 resource "aws_iam_role_policy" "production_iam_permissions" {
   name = "security-compliance-scanner-production-iam-permissions"
