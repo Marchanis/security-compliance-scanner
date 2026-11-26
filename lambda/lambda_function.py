@@ -57,7 +57,6 @@ def lambda_handler(event, context):
         )
     else:
         print("Security scan completed successfully. No findings or errors.")
-    print(result)
     return result
        
     
