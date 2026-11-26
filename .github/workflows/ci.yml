@@ -1,4 +1,6 @@
+
 name: CI
+
 on:
   pull_request:
     branches:
@@ -25,10 +27,52 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
-      - name: Terraform init
+      - name: Terraform Init
         run: terraform init -backend=false -input=false
 
-      - name: Terraform Format & Validate
+      - name: Terraform Format and Validate
+        run: |
+          terraform fmt -check -recursive
+          terraform validate
+
+  dev:
+    name: "Dev Format and Validate"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: environments/dev
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -backend=false -input=false
+
+      - name: Terraform Format and Validate
+        run: |
+          terraform fmt -check -recursive
+          terraform validate
+
+  production:
+    name: "Production Format and Validate"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: environments/production
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Terraform Init
+        run: terraform init -backend=false -input=false
+
+      - name: Terraform Format and Validate
         run: |
           terraform fmt -check -recursive
           terraform validate
@@ -45,8 +89,8 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: pip install -r requirements.txt
 
-      - name: Run tests
+      - name: Run Tests
         run: pytest -q
